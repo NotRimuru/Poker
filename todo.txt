@@ -1,6 +1,0 @@
-- player models
-- spawing player models
-- player animations
-- player cards
-- clinet-server cards
-- make table card sprites ( js do floating models )
