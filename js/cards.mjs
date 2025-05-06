@@ -110,6 +110,14 @@ export async function tableCards() {
     }, 3000 );
 }
 
+export function deleteTableCards() {
+    for( let i = 0; i < 5; i++ ) {
+        const card = DATA.scene.getObjectByName( `${ type }_table_card_${ number }` );
+
+        card.removeFromParent();
+    }
+}
+
 export async function playerCards( id ) {
     const body = { key: DATA.player.key };
     const data = await DATA.handleData( 'get_table', body );

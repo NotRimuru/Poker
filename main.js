@@ -108,17 +108,9 @@ async function startGame() {
     MENU.prepareMenu();
 
     //round roundabouts
-    const gameUpdateInterval = setInterval( async () => {
-        const newData = await DATA.handleData( 'get_table', body );
-        
-        for( let i = 0; i < newData.players.length; i++ ) {
-            if( newData.players[ i ] != data.players[ i ] ) {
-                console.log(  )
-            }
-        }
-    } , 3000);
-
 }
+
+
 
 startGame();
 

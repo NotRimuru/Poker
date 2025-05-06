@@ -46,30 +46,38 @@ function disableMenu() {
     menu.style.opacity = 0.5;
 }
 
-async function handleFold() {
-    disableMenu();
-
-    const body = JSON.stringify({ key: player.key, action: 'fold' });
-    await handleData( 'action', body );
-
+async function foldCards( playerId ) {
     for( let i = 0; i < 2; i++ ) {
         const card = scene.getObjectByName( `player_card_${ playerId }_${ i }` );
         card.translateY( -0.5 );
 
         card.rotation.set( Math.PI * 0.5, 0, ( Math.random() * 1 ) - 0.5 );
     }
+}
 
-    playerStatus = 'fold';
+async function handleFold() {
+    disableMenu();
+
+    const body = { key: player.key, action: 'fold' };
+    await handleData( 'action', body );
+
+    foldCards( player.id );
+
+    player.status  = 'fold';
+
+    awaitYourTurn()
 }
  
 async function handleRaise() {
     disableMenu();
 
     const slider = document.getElementsByClassName( 'slider' )[ 0 ].children[ 0 ];
-    const body = JSON.stringify({ key: player.key, action: { raise: slider.value } });
+    const body = { key: player.key, action: { raise: slider.value } };
     await handleData( 'action', body );
 
-    playerStatus = 'raise';
+    player.status = 'raise';
+
+    awaitYourTurn()
 }
 
 async function handleCheck() {
@@ -78,8 +86,85 @@ async function handleCheck() {
     const check = document.getElementById( 'check' );
     const action = check.textContent.toLocaleLowerCase();
 
-    const body = JSON.stringify({ key: player.key, action: action });
+    const body = { key: player.key, action: action };
     await handleData( 'action', body );
 
-    playerStatus = action;
+    player.status = action;
+
+    awaitYourTurn()
+}
+
+async function showInfo( text ) {
+    const info = document.getElementById( 'info' );
+
+    info.textContent = text;
+
+    info.animate( 
+        [ 
+            { opacity: 0 },
+            { opacity: 1 }
+        ], 
+        {
+            duration: 150,
+            fill: 'forwards'
+        }
+    );
+
+    setTimeout( () => {
+        info.animate( 
+            [ 
+                { opacity: 1 },
+                { opacity: 0 }
+            ], 
+            {
+                duration: 150,
+                fill: 'forwards'
+            }
+        );
+    }, 3000);
+
+}
+
+async function awaitYourTurn() {
+    const body = { key: player.key };
+    let data = await handleData( 'get_table', body );
+
+    const gameUpdateInterval = setInterval( async () => {
+        const newData = await handleData( 'get_table', body );
+        
+        if( newData[ newData[ 'current_player_id' ] ] == data[ 'current_player_id' ]  ) return;
+
+        console.log( 'next player turn!' );
+
+        const oldPlayer = data[ 'players' ][ data[ 'current_player_id' ] ];
+        if ( oldPlayer[ 'has_folded' ] ) {
+            foldCards( data[ 'current_player_id' ] );
+            //fold
+
+            showInfo( `Player ${ oldPlayer[ 'name' ] } has folded.` );
+        }
+        else if ( newData[ 'current_required_bet' ] > data[ 'current_required_bet' ] ) {
+            //raise
+
+            showInfo( `Player ${ oldPlayer[ 'name' ] } has raised by ${ newData[ 'current_required_bet' ] - data[ 'current_required_bet' ] }.` );
+        }
+        else if ( newData[ 'players' ][ data[ 'current_player_id' ] ][ 'current_bet' ] > oldPlayer[ 'current_bet' ] ) {
+            //call
+
+            showInfo( `Player ${ oldPlayer[ 'name' ] } has called.` );
+        }
+        else {
+            //check
+
+            showInfo( `Player ${ oldPlayer[ 'name' ] } has checked.` );
+        }
+
+        if( newData[ 'current_player_id' ] == player.id ) {
+            clearInterval( gameUpdateInterval );
+            prepareMenu();
+            return;
+        }
+        
+        data = await handleData( 'get_table', body );
+    } , 3000);
 }
