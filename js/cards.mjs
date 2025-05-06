@@ -118,7 +118,7 @@ export async function playerCards( id ) {
     group.position.set( DATA.playerTransform[ id ][ 0 ] , 0.927, DATA.playerTransform[ id ][ 2 ] );
 
     for( let i = 0; i < 2; i++ ) {
-        const cardData = data[ 'players' ][ 0 ][ "cards" ][ i ];
+        const cardData = data[ 'players' ][ DATA.player.id ][ "cards" ][ i ];
 
         createCard( cardData.color, cardData.rank, `player_card_${ id }_${ i }` );
         const card = DATA.scene.getObjectByName( `player_card_${ id }_${ i }` );

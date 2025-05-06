@@ -7,8 +7,6 @@ import { rotateCamera } from '/js/keyboard.mjs';
 import * as DATA from '/js/data.mjs';
 import * as CARDS from '/js/cards.mjs';
 import * as MENU from '/js/menu.mjs';
-import { player } from './data.mjs';
-import { playerCards } from './cards.mjs';
 
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize( window.innerWidth, window.innerHeight );
@@ -82,14 +80,14 @@ async function startGame() {
     await DATA.handleData( 'start', body );
 
     const data = await DATA.handleData( 'get_table', body );
-    // for( let i = 0; i < data.players.length; i++ ) {
-    //     if( data.players[ i ] == null ) {
-    //         DATA.player.setId( i - 1 );
-    //         break;
-    //     }
-    // }
+    for( let i = 0; i < data.players.length; i++ ) {
+        if( data.players[ i ] == null ) {
+            DATA.player.setId( i - 1 );
+            break;
+        }
+    }
 
-    DATA.player.setId( 0 );
+    // DATA.player.setId( 0 );
 
     console.log( data );
 
@@ -103,16 +101,22 @@ async function startGame() {
     for( let i = 0; i < data.players.length; i++ ) {
         if( data.players[ i ] == null ) break;
 
-        playerCards( i );
+        CARDS.playerCards( i );
     }
 
     //prepare ui
     MENU.prepareMenu();
 
     //round roundabouts
-    setInterval( () => {
+    const gameUpdateInterval = setInterval( async () => {
+        const newData = await DATA.handleData( 'get_table', body );
         
-    }, 3000);
+        for( let i = 0; i < newData.players.length; i++ ) {
+            if( newData.players[ i ] != data.players[ i ] ) {
+                console.log(  )
+            }
+        }
+    } , 3000);
 
 }
 

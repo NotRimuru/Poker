@@ -5,6 +5,8 @@ export async function prepareMenu() {
     const body = { key: player.key };
     const data = await handleData( 'get_table', body );
 
+    if( data.players[ player.id ][ 'has_folded' ] == true ) return;
+
     const fold = document.getElementById( 'fold' );
     fold.addEventListener( 'click', handleFold );
 
@@ -20,12 +22,15 @@ export async function prepareMenu() {
     const sliderWrapper = document.getElementsByClassName( 'slider' )[ 0 ];
     const slider = sliderWrapper.children[ 0 ];
 
-    slider.min = data.pot + 1;
+    slider.min = data[ 'current_required_bet' ] + 1;
     slider.max = data.players[ 0 ].chips;
     slider.value = slider.min;
 
     const output = sliderWrapper.children[ 1 ];
     output.value = slider.min;
+
+    const menu = document.getElementById( 'menu' );
+    menu.style.opacity = 1;
 }
 
 function disableMenu() {
@@ -44,7 +49,7 @@ function disableMenu() {
 async function handleFold() {
     disableMenu();
 
-    const body = JSON.stringify({ key: key, action: 'fold' });
+    const body = JSON.stringify({ key: player.key, action: 'fold' });
     await handleData( 'action', body );
 
     for( let i = 0; i < 2; i++ ) {
@@ -61,7 +66,7 @@ async function handleRaise() {
     disableMenu();
 
     const slider = document.getElementsByClassName( 'slider' )[ 0 ].children[ 0 ];
-    const body = JSON.stringify({ key: key, action: { raise: slider.value } });
+    const body = JSON.stringify({ key: player.key, action: { raise: slider.value } });
     await handleData( 'action', body );
 
     playerStatus = 'raise';
@@ -73,7 +78,7 @@ async function handleCheck() {
     const check = document.getElementById( 'check' );
     const action = check.textContent.toLocaleLowerCase();
 
-    const body = JSON.stringify({ key: key, action: action });
+    const body = JSON.stringify({ key: player.key, action: action });
     await handleData( 'action', body );
 
     playerStatus = action;
