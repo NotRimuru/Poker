@@ -73,19 +73,28 @@ async function startGame() {
         localStorage.setItem( 'name', name );
     }
 
-    const key = await DATA.handleData( 'join', { name: localStorage.getItem( 'name' ) } )
+    // localStorage.removeItem( 'key' )
+    let key = localStorage.getItem( 'key' );
+    if( key == undefined ) {
+        key = await DATA.handleData( 'join', { name: localStorage.getItem( 'name' ), table: 0 } );
+        if( key == "Failed" ) {
+            key = await DATA.handleData( 'create', { name: localStorage.getItem( 'name' ) } );
+        }
+        localStorage.setItem( 'key', key );
+    }
+
     DATA.player.setKey( key );
 
-    const body = { key: key };
-    await DATA.handleData( 'start', body );
+    const start = document.getElementById( 'start' );
+    start.addEventListener( 'click', async () => {
+        start.style.display = 'none';
 
-    const data = await DATA.handleData( 'get_table', body );
-    for( let i = 0; i < data.players.length; i++ ) {
-        if( data.players[ i ] == null ) {
-            DATA.player.setId( i - 1 );
-            break;
-        }
-    }
+        await DATA.handleData( 'start', { key: key } );
+        location.reload();
+    } );
+
+    const data = await DATA.handleData( 'get_table', { key: key } );
+    DATA.player.id = data[ 'player' ];
 
     // DATA.player.setId( 0 );
 
@@ -106,11 +115,7 @@ async function startGame() {
 
     //prepare ui
     MENU.prepareMenu();
-
-    //round roundabouts
 }
-
-
 
 startGame();
 
@@ -126,4 +131,4 @@ function animate() {
     renderer.render( DATA.scene, DATA.player.camera );
 }
 
-renderer.setAnimationLoop( animate );
+renderer.setAnimationLoop( animate );   

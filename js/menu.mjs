@@ -1,4 +1,4 @@
-import { player, handleData } from '/js/data.mjs';
+import { player, handleData, scene } from '/js/data.mjs';
  
 export async function prepareMenu() {
 
@@ -16,13 +16,15 @@ export async function prepareMenu() {
     const check = document.getElementById( 'check' );
     check.addEventListener( 'click', handleCheck );
 
-    const text = data.bet > 0 ? 'Call' : 'Check';
+    const text = data[ 'current_required_bet' ] > data.players[ player.id ][ 'current_bet' ] ? 'Call' : 'Check';
     check.textContent = text;
 
     const sliderWrapper = document.getElementsByClassName( 'slider' )[ 0 ];
     const slider = sliderWrapper.children[ 0 ];
 
-    slider.min = data[ 'current_required_bet' ] + 1;
+    const min = data[ 'minimal_bid' ] < data[ 'current_required_bet' ] ? data[ 'current_required_bet' ] : data[ 'minimal_bid' ];
+
+    slider.min = data[ 'minimal_bid' ];
     slider.max = data.players[ 0 ].chips;
     slider.value = slider.min;
 
@@ -51,14 +53,14 @@ async function foldCards( playerId ) {
         const card = scene.getObjectByName( `player_card_${ playerId }_${ i }` );
         card.translateY( -0.5 );
 
-        card.rotation.set( Math.PI * 0.5, 0, ( Math.random() * 1 ) - 0.5 );
+        card.rotation.set( 0, 0, ( Math.random() * 1 ) - 0.5 );
     }
 }
 
 async function handleFold() {
     disableMenu();
 
-    const body = { key: player.key, action: 'fold' };
+    const body = { key: player.key, action: 'Fold' };
     await handleData( 'action', body );
 
     foldCards( player.id );
@@ -72,7 +74,7 @@ async function handleRaise() {
     disableMenu();
 
     const slider = document.getElementsByClassName( 'slider' )[ 0 ].children[ 0 ];
-    const body = { key: player.key, action: { raise: slider.value } };
+    const body = { key: player.key, action: { Raise: slider.value } };
     await handleData( 'action', body );
 
     player.status = 'raise';
@@ -84,7 +86,7 @@ async function handleCheck() {
     disableMenu();
 
     const check = document.getElementById( 'check' );
-    const action = check.textContent.toLocaleLowerCase();
+    const action = check.textContent;
 
     const body = { key: player.key, action: action };
     await handleData( 'action', body );

@@ -57,7 +57,7 @@ export async function handleData( location, body ) {
         }
 
         let result;
-        if( location == 'join' ) result = response.text();
+        if( location == 'create' || location == "join" ) result = response.text();
         else if( location == 'get_table' ) result = response.json();
 
         return result;

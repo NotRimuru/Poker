@@ -3,6 +3,7 @@ import { FontLoader } from 'three/examples/jsm/loaders/FontLoader';
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry';
 
 import * as DATA from '/js/data.mjs';
+import { color } from 'three/src/nodes/TSL.js';
 
 function createCard( suit, rank, name ) {
 
@@ -128,7 +129,9 @@ export async function playerCards( id ) {
     for( let i = 0; i < 2; i++ ) {
         const cardData = data[ 'players' ][ DATA.player.id ][ "cards" ][ i ];
 
-        createCard( cardData.color, cardData.rank, `player_card_${ id }_${ i }` );
+        const color = cardData == null ? "" : cardData.color;
+        const rank = cardData == null ? "" : cardData.rank;
+        createCard( color, rank, `player_card_${ id }_${ i }` );
         const card = DATA.scene.getObjectByName( `player_card_${ id }_${ i }` );
         
         const box3 = new THREE.Box3().setFromObject( card );
