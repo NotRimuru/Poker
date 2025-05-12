@@ -3,7 +3,6 @@ import { FontLoader } from 'three/examples/jsm/loaders/FontLoader';
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry';
 
 import * as DATA from '/js/data.mjs';
-import { color } from 'three/src/nodes/TSL.js';
 
 function createCard( suit, rank, name ) {
 
@@ -113,7 +112,15 @@ export async function tableCards() {
 
 export function deleteTableCards() {
     for( let i = 0; i < 5; i++ ) {
-        const card = DATA.scene.getObjectByName( `${ type }_table_card_${ number }` );
+        const card = DATA.scene.getObjectByName( `mesh_table_card_${ i }` );
+
+        card.removeFromParent();
+    }
+
+    if( !DATA.scene.getObjectByName( 'card_sprite' ) ) return;
+    
+    for( let i = 0; i < 5; i++ ) {
+        const card = DATA.scene.getObjectByName( `sprite_table_card_${ i }` );
 
         card.removeFromParent();
     }

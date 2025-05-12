@@ -1,4 +1,5 @@
 import { player, handleData, scene } from '/js/data.mjs';
+import { tableCards, deleteTableCards } from './cards.mjs';
  
 export async function prepareMenu() {
 
@@ -24,12 +25,18 @@ export async function prepareMenu() {
 
     const min = data[ 'minimal_bid' ] < data[ 'current_required_bet' ] ? data[ 'current_required_bet' ] : data[ 'minimal_bid' ];
 
-    slider.min = data[ 'minimal_bid' ];
+    slider.disabled = false;
+    slider.min = min;
     slider.max = data.players[ 0 ].chips;
     slider.value = slider.min;
 
     const output = sliderWrapper.children[ 1 ];
     output.value = slider.min;
+
+    if( data.player != 0 ) {
+        const start = document.getElementById( 'start' );
+        start.remove();
+    }
 
     const menu = document.getElementById( 'menu' );
     menu.style.opacity = 1;
@@ -46,6 +53,9 @@ function disableMenu() {
 
     const menu = document.getElementById( 'menu' );
     menu.style.opacity = 0.5;
+
+    const slider = document.getElementsByClassName( 'slider' )[ 0 ].children[ 0 ];
+    slider.disabled = true;
 }
 
 async function foldCards( playerId ) {
@@ -159,6 +169,13 @@ async function awaitYourTurn() {
             //check
 
             showInfo( `Player ${ oldPlayer[ 'name' ] } has checked.` );
+        }
+
+        if( newData[ 'revealed_cards' ] != data[ 'revealed_cards' ] ) {
+            console.log( newData[ 'revealed_cards' ], data[ 'revealed_cards' ] );
+            
+            deleteTableCards();
+            tableCards();
         }
 
         if( newData[ 'current_player_id' ] == player.id ) {
