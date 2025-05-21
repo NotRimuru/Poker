@@ -19,7 +19,7 @@ body {
     gap: 5lvh;
 }
 
-.button, .slider {
+.button, #slider-wrapper {
     width: 8lvw;
     height: fit-content;
 
@@ -35,7 +35,7 @@ body {
     font-size: 3lvh;
 }
 
-.slider { 
+#slider-wrapper { 
     height: 3.5lvh;
     width: 30lvw;
 
@@ -48,19 +48,25 @@ body {
     flex-direction: row-reverse;
 }
 
-.slider > input[ type = "range" ] {
-    width: 25lvw;
+#slider-wrapper > input[ type = "range" ] {
+    width: 20lvw;
 
     position: absolute;
     transform: translate( -50%, -50% );
     top: 45%;
-    left: 45%;
+    left: 35%;
 
     accent-color: #999;
 }
 
-.slider > output {
-    margin-right: 1lvw;
+#output-wrapper {
+    position: absolute;
+    transform: translate( -50%, -50% );
+    top: 45%;
+    left: 85%;
+
+    display: flex;
+
 }
 
 #info {

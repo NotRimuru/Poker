@@ -3,19 +3,18 @@ import { handleData, player, scene } from "./data.mjs";
 import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
 import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
 
-export async function pot() {
-    const data = await handleData( 'get_table', { key: player.key } );
-    
+function pot( value ) {
     let geometry = new THREE.PlaneGeometry( 2, 0.5 );
     let material = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 }); 
     const sprite = new THREE.Mesh( geometry, material );
+    sprite.name = 'pot';
 
     sprite.position.set( 0, 2.5, 0 );
 
     const fontLoader = new FontLoader();
 
     fontLoader.load( 'assets/fonts/text.json', ( font ) => {
-        geometry = new TextGeometry( `pot: ${ data.pot }`,
+        geometry = new TextGeometry( `pot: ${ value }`,
             { 
                 size: 0.18,
                 depth: 0.01,
@@ -42,3 +41,12 @@ export async function pot() {
     scene.add( sprite );
 }
 
+
+export function refreshPot( value ) {
+    const potSprite = scene.getObjectByName( 'pot' );
+    if( potSprite != undefined ) {
+        potSprite.removeFromParent();
+    }
+    
+    pot( value );
+}

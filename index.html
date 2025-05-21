@@ -22,15 +22,16 @@
   <div id = "menu">
     <div id = "fold" class = "button"> Fold </div>
 
-    <div id = "raise-wrapper">
-      <div class = "slider">
-        <input type = "range" id = "bet" oninput="this.nextElementSibling.value = this.value">
+    <div id = "slider-wrapper">
+      <input type = "range" id = "slider">
+      <div id = "output-wrapper">
         <output>0</output>
+        &nbsp;/&nbsp; 
+        <div id = "max-output"></div>
       </div>
-      <div id = "raise" class = "button">Raise</div>
     </div>
 
-    <div id = "check" class = "button"> Check </div>
+    <div id = "action" class = "button"> Check </div>
   </div>
 
   <div id = "start"></div>

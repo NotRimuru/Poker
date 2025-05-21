@@ -7,7 +7,7 @@ import { rotateCamera } from '/js/keyboard.mjs';
 import * as DATA from '/js/data.mjs';
 import * as CARDS from '/js/cards.mjs';
 import * as MENU from '/js/menu.mjs';
-import { pot } from '/js/table.mjs';
+import { refreshPot } from './js/table.mjs';
  
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize( window.innerWidth, window.innerHeight );
@@ -76,6 +76,8 @@ async function startGame() {
 
     // localStorage.removeItem( 'key' );
     let key = localStorage.getItem( 'key' );
+    // console.log( await DATA.handleData( 'find', { key: key } ) )
+    // if( await DATA.handleData( 'find', { key: key } ) == undefined ) {
     if( key == undefined ) {
         key = await DATA.handleData( 'join', { name: localStorage.getItem( 'name' ), table: 0 } );
 
@@ -116,7 +118,7 @@ async function startGame() {
     }
 
     //show pot
-    pot();
+    refreshPot( data.pot );
 
     //prepare ui
     MENU.prepareMenu();

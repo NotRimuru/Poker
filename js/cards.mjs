@@ -125,6 +125,15 @@ export function deleteTableCards() {
         card.removeFromParent();
     }
 }
+  
+export function foldCards( id ) {
+    for( let i = 0; i < 2; i++ ) {
+        const card = DATA.scene.getObjectByName( `player_card_${ id }_${ i }` );
+        card.translateY( -0.5 );
+
+        card.rotation.set( 0, 0, ( Math.random() * 1 ) - 0.5 );
+    }
+}
 
 export async function playerCards( id ) {
     const body = { key: DATA.player.key };
@@ -153,8 +162,10 @@ export async function playerCards( id ) {
     group.rotation.set( 0, DATA.playerTransform[ id ][ 3 ] * 3.2, 0 );
     group.rotateX( Math.PI * 0.5 );
     group.translateY( -1 );
-
+    
     DATA.scene.add( group );
+
+    if( data[ 'players' ][ id ][ 'has_folded' ] ) foldCards( id );
 }
 
 export function rotateCards( revealed ) {
