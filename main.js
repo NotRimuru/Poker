@@ -78,6 +78,7 @@ async function startGame() {
     let key = localStorage.getItem( 'key' );
     if( key == undefined ) {
         key = await DATA.handleData( 'join', { name: localStorage.getItem( 'name' ), table: 0 } );
+
         if( key == "Failed" ) {
             key = await DATA.handleData( 'create', { name: localStorage.getItem( 'name' ) } );
         }

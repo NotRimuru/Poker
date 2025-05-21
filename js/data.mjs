@@ -52,6 +52,10 @@ export async function handleData( location, body ) {
             body: JSON.stringify( body )
         });
 
+        if( response.status == 403 ){
+            return "Failed";
+        }
+
         if (!response.ok) {
             throw new Error(`Response status: ${response.status}`);
         }
