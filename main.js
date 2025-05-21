@@ -7,7 +7,8 @@ import { rotateCamera } from '/js/keyboard.mjs';
 import * as DATA from '/js/data.mjs';
 import * as CARDS from '/js/cards.mjs';
 import * as MENU from '/js/menu.mjs';
-
+import { pot } from '/js/table.mjs';
+ 
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize( window.innerWidth, window.innerHeight );
 document.body.appendChild( renderer.domElement );
@@ -53,7 +54,7 @@ let keyboard = {};
 window.onkeydown = ( e ) => {
     const key = e.key.toLowerCase();
 
-    if( key == " " && !keyboard[ key ] ) CARDS.rotateCards( true );
+    if( key == ' ' && !keyboard[ key ] ) CARDS.rotateCards( true );
 
     keyboard[ key ] = true;
 }
@@ -61,7 +62,7 @@ window.onkeydown = ( e ) => {
 window.onkeyup = ( e ) => {
     const key = e.key.toLowerCase();
 
-    if( key == " " && keyboard[ key ] ) CARDS.rotateCards( false );
+    if( key == ' ' && keyboard[ key ] ) CARDS.rotateCards( false );
 
     keyboard[ key ] = false;
 }
@@ -73,7 +74,7 @@ async function startGame() {
         localStorage.setItem( 'name', name );
     }
 
-    // localStorage.removeItem( 'key' )
+    // localStorage.removeItem( 'key' );
     let key = localStorage.getItem( 'key' );
     if( key == undefined ) {
         key = await DATA.handleData( 'join', { name: localStorage.getItem( 'name' ), table: 0 } );
@@ -112,6 +113,9 @@ async function startGame() {
 
         CARDS.playerCards( i );
     }
+
+    //show pot
+    pot();
 
     //prepare ui
     MENU.prepareMenu();
