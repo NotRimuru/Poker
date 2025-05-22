@@ -23,7 +23,7 @@ export async function prepareMenu() {
     balance.innerHTML = `Balance: ${ data[ 'players' ][ player.id ][ 'chips' ] }`; 
 
     const bet = document.getElementById( 'bet' );
-    bet.innerHTML = `Bet: ${ data[ 'players' ][ player.id ][ 'current_bet' ] }`; 
+    bet.innerHTML = `Bet: ${ data[ 'current_required_bet' ] }`; 
 
     if( data.current_player_index != player.id ) {
         awaitYourTurn();
@@ -37,6 +37,7 @@ export async function prepareMenu() {
     fold.addEventListener( 'click', handleFold );
 
     const raise = document.getElementById( 'raise' );
+    raise.innerHTML = data[ 'current_required_bet' ] > 0 ? 'Raise' : 'Bet';
     raise.addEventListener( 'click', handleRaise );
 
     const action = document.getElementById( 'action' );
@@ -174,7 +175,6 @@ async function awaitYourTurn() {
         }
         else {
             //check
-            console.log( 'checked' )
 
             showInfo( `Player ${ oldPlayer[ 'name' ] } has checked.` );
         }
@@ -184,12 +184,10 @@ async function awaitYourTurn() {
             tableCards();
         }
 
+        prepareMenu();
         if( newData[ 'current_player_index' ] == player.id ) {
             clearInterval( gameUpdateInterval );
-            prepareMenu();
             return;
         }
-        
-        data = await handleData( 'get_table', body );
-    } , 3000);
+    } , 5000);
 }

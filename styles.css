@@ -91,15 +91,15 @@ body {
 }
 
 #start {
-    height: 10lvh;
-    aspect-ratio: 1;
+    height: 5lvh;
+    width: 6lvw;
 
-    background-color: #333;
+    background-color: #444;
 
     position: absolute;
     transform: translate( -50%, -50% );
-    top: 10%;
-    left: 10%;
+    top: 74%;
+    left: 50%;
 
     border-radius: 2lvh;
 

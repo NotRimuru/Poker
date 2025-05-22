@@ -8,6 +8,7 @@ import * as DATA from '/js/data.mjs';
 import * as CARDS from '/js/cards.mjs';
 import * as MENU from '/js/menu.mjs';
 import { refreshPot } from './js/table.mjs';
+import { deleteTableCards, tableCards } from './js/cards.mjs';
  
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize( window.innerWidth, window.innerHeight );
@@ -67,43 +68,7 @@ window.onkeyup = ( e ) => {
     keyboard[ key ] = false;
 }
 
-async function startGame() {
-
-    if( !localStorage.getItem( 'name' ) ) {
-        const name = prompt( 'Podaj imie: ', );
-        localStorage.setItem( 'name', name );
-    }
-
-    let key = localStorage.getItem( 'key' );
-    const table = await DATA.handleData( 'find', { key: key } );
-    if( table[ 'table' ] == -1 ) {
-        key = await DATA.handleData( 'join', { name: localStorage.getItem( 'name' ), table: 0 } );
-
-        if( key == "Failed" ) {
-            key = await DATA.handleData( 'create', { name: localStorage.getItem( 'name' ) } );
-        }
-        localStorage.setItem( 'key', key );
-    }
-
-    DATA.player.setKey( key );
-
-    const start = document.getElementById( 'start' );
-    start.addEventListener( 'click', async () => {
-        start.style.display = 'none';
-
-        await DATA.handleData( 'start', { key: key } );
-        location.reload();
-    } );
-
-    const data = await DATA.handleData( 'get_table', { key: key } );
-    DATA.player.id = data[ 'player' ];
-
-    // DATA.player.setId( 0 );
-
-    console.log( data );
-
-    DATA.player.camera.position.set( DATA.playerTransform[ DATA.player.id ][ 0 ], DATA.playerTransform[ DATA.player.id ][ 1 ], DATA.playerTransform[ DATA.player.id ][ 2 ] );
-    DATA.player.camera.rotation.set( 0, DATA.playerTransform[ DATA.player.id ][ 3 ] * 3.2, 0 );
+async function startGame( data ) {
 
     //spawn table cards
     CARDS.tableCards();
@@ -122,7 +87,102 @@ async function startGame() {
     MENU.prepareMenu();
 }
 
-startGame();
+async function waitForTheGame() {
+    
+    if( !localStorage.getItem( 'name' ) ) {
+        const name = prompt( 'Podaj imie: ', );
+        localStorage.setItem( 'name', name );
+    }
+
+    let key = localStorage.getItem( 'key' );
+    const table = await DATA.handleData( 'find', { key: key } );
+    if( table[ 'table' ] == -1 ) {
+        key = await DATA.handleData( 'join', { name: localStorage.getItem( 'name' ), table: 0 } );
+
+        if( key == "Failed" ) {
+            key = await DATA.handleData( 'create', { name: localStorage.getItem( 'name' ) } );
+        }
+        localStorage.setItem( 'key', key );
+    }
+
+    DATA.player.setKey( key );
+
+    const data = await DATA.handleData( 'get_table', { key: key } );
+    DATA.player.setId( data[ 'player' ] );
+
+    console.log( data );
+
+    DATA.player.camera.position.set( DATA.playerTransform[ DATA.player.id ][ 0 ], DATA.playerTransform[ DATA.player.id ][ 1 ], DATA.playerTransform[ DATA.player.id ][ 2 ] );
+    DATA.player.camera.rotation.set( 0, DATA.playerTransform[ DATA.player.id ][ 3 ] * 3.2, 0 );
+
+    if( data[ 'is_game_running' ] ) {
+        startGame( data );
+        return;
+    }
+
+    const info = document.getElementById( 'info' );
+    info.textContent = 'Waiting for the game to start!';
+    info.style.opacity = 1;
+
+    if( DATA.player.id == 0 ) {
+        const start = document.createElement( 'div' );
+        start.id = 'start';
+        start.textContent = 'Start';
+
+        start.addEventListener( 'click', async () => {
+            start.style.display = 'none';
+            
+            info.textContent = 'Starting the game!';
+            setTimeout( () => {
+                info.animate( 
+                    [
+                        { opacity: 1 },
+                        { opacity: 0 }
+                    ], 
+                    {
+                        fill: 'forwards',
+                        duration: 200
+                    } 
+                )
+
+            }, 2000 );
+
+            await DATA.handleData( 'start', { key: key } );
+        } );
+
+        document.body.appendChild( start );
+    }
+
+    const gameUpdateInterval = setInterval( async () => {
+        const body = { key: DATA.player.key };
+        const newData = await DATA.handleData( 'get_table', body );
+        
+        if( newData[ 'is_game_running' ] ) {
+            
+            startGame( newData );
+
+            info.textContent = 'Starting the game!';
+            setTimeout( () => {
+                info.animate( 
+                    [
+                        { opacity: 1 },
+                        { opacity: 0 }
+                    ], 
+                    {
+                        fill: 'forwards',
+                        duration: 200
+                    } 
+                )
+
+            }, 2000 );
+
+            clearInterval( gameUpdateInterval );    
+            return;
+        }
+    } , 5000);
+}
+
+waitForTheGame();
 
 const clock = new THREE.Clock();
 let delta;
