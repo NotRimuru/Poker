@@ -16,24 +16,14 @@ export async function prepareMenu() {
     slider.max = data[ 'players' ][ player.id ][ 'chips' ];
     slider.value = slider.min;
 
-    slider.addEventListener( 'input', () => {
-        slider.nextElementSibling.children[ 0 ].value = slider.value;
-
-        const action = document.getElementById( 'action' );
-
-        if( slider.value > slider.min ) {
-            action.innerHTML = "Raise";
-        }
-        else if( slider.value == slider.min ) {
-            action.innerHTML = data[ 'current_required_bet' ] > 0 ? "Call" : "Check";
-        }
-    } );
-
-    const outputWrapper = document.getElementById( 'output-wrapper' );
-    const output = outputWrapper.children[ 0 ];
-    const maxOutput = outputWrapper.children[ 1 ];
+    const output = slider.nextElementSibling;
     output.value = slider.min;
-    maxOutput.innerHTML = data[ 'players' ][ player.id ][ 'chips' ]; 
+
+    const balance = document.getElementById( 'balance' );
+    balance.innerHTML = `Balance: ${ data[ 'players' ][ player.id ][ 'chips' ] }`; 
+
+    const bet = document.getElementById( 'bet' );
+    bet.innerHTML = `Bet: ${ data[ 'players' ][ player.id ][ 'current_bet' ] }`; 
 
     if( data.current_player_index != player.id ) {
         awaitYourTurn();
@@ -46,7 +36,11 @@ export async function prepareMenu() {
     const fold = document.getElementById( 'fold' );
     fold.addEventListener( 'click', handleFold );
 
+    const raise = document.getElementById( 'raise' );
+    raise.addEventListener( 'click', handleRaise );
+
     const action = document.getElementById( 'action' );
+    action.innerHTML = data[ 'current_required_bet' ] > 0 ? "Call" : "Check";
     action.addEventListener( 'click', handleAction );
 
     if( data.player != 0 ) {
@@ -87,22 +81,26 @@ async function handleFold() {
 
     awaitYourTurn()
 }
+
+async function handleRaise() {
+    disableMenu();
+
+    const slider = document.getElementById( 'slider' );
+    const body = { key: player.key, action: { Raise: parseInt( slider.value ) } };
+    await handleData( 'action', body );
+
+    player.status = 'raise';
+
+    awaitYourTurn()
+}
  
 async function handleAction() {
     disableMenu();
 
     const action = document.getElementById( 'action' );
     const value = action.textContent;
-
-    if( value == 'Raise' ) {
-        const slider = document.getElementById( 'slider' );
-        const body = { key: player.key, action: { Raise: parseInt( slider.value ) } };
-        await handleData( 'action', body );
-    }
-    else {
-        const body = { key: player.key, action: value };
-        await handleData( 'action', body );
-    }
+    const body = { key: player.key, action: value };
+    await handleData( 'action', body );
 
     player.status = value;
 
@@ -151,7 +149,6 @@ async function awaitYourTurn() {
         console.log( 'update' );
         const newData = await handleData( 'get_table', body );
         
-        console.log( newData[ 'current_player_index' ] == data[ 'current_player_index' ]  );
         if( newData[ 'current_player_index' ] == data[ 'current_player_index' ]  ) return;
 
         console.log( 'next player turn!' );
@@ -182,9 +179,7 @@ async function awaitYourTurn() {
             showInfo( `Player ${ oldPlayer[ 'name' ] } has checked.` );
         }
 
-        if( newData[ 'revealed_cards' ] != data[ 'revealed_cards' ] ) {
-            console.log( newData[ 'revealed_cards' ], data[ 'revealed_cards' ] );
-            
+        if( newData[ 'revealed_cards' ] != data[ 'revealed_cards' ] ) {       
             deleteTableCards();
             tableCards();
         }

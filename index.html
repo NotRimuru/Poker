@@ -20,18 +20,19 @@
   <div id = "info" ></div>
 
   <div id = "menu">
-    <div id = "fold" class = "button"> Fold </div>
-
-    <div id = "slider-wrapper">
-      <input type = "range" id = "slider">
-      <div id = "output-wrapper">
-        <output>0</output>
-        &nbsp;/&nbsp; 
-        <div id = "max-output"></div>
-      </div>
+    <div id = "player-info">
+      <div id = "balance">Balance: 0</div>
+      <div id = "bet">Bet: 0</div>
     </div>
 
-    <div id = "action" class = "button"> Check </div>
+    <div id = "slider-wrapper">
+      <input type = "range" id = "slider" oninput = "this.nextElementSibling.value = this.value">
+      <output id = 'output'>0</output>
+    </div>
+
+    <div id = "fold" class = "button">Fold</div>
+    <div id = "raise" class = "button">Raise</div>
+    <div id = "action" class = "button">Check</div>
   </div>
 
   <div id = "start"></div>
