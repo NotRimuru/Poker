@@ -74,11 +74,10 @@ async function startGame() {
         localStorage.setItem( 'name', name );
     }
 
-    // localStorage.removeItem( 'key' );
     let key = localStorage.getItem( 'key' );
-    // console.log( await DATA.handleData( 'find', { key: key } ) )
-    // if( await DATA.handleData( 'find', { key: key } ) == undefined ) {
-    if( key == undefined ) {
+    const table = await DATA.handleData( 'find', { key: key } );
+    console.log( table[ 'table' ] )
+    if( table[ 'table' ] == -1 ) {
         key = await DATA.handleData( 'join', { name: localStorage.getItem( 'name' ), table: 0 } );
 
         if( key == "Failed" ) {
