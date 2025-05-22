@@ -35,7 +35,7 @@ export async function prepareMenu() {
     output.value = slider.min;
     maxOutput.innerHTML = data[ 'players' ][ player.id ][ 'chips' ]; 
 
-    if( data.curent_player_index != player.id ) {
+    if( data.current_player_index != player.id ) {
         awaitYourTurn();
         disableMenu();
         return;
@@ -151,16 +151,16 @@ async function awaitYourTurn() {
         console.log( 'update' );
         const newData = await handleData( 'get_table', body );
         
-        console.log( newData[ 'curent_player_index' ] == data[ 'curent_player_index' ]  );
-        if( newData[ 'curent_player_index' ] == data[ 'curent_player_index' ]  ) return;
+        console.log( newData[ 'current_player_index' ] == data[ 'current_player_index' ]  );
+        if( newData[ 'current_player_index' ] == data[ 'current_player_index' ]  ) return;
 
         console.log( 'next player turn!' );
         refreshPot( data.pot );
 
-        const oldPlayer = data[ 'players' ][ data[ 'curent_player_index' ] ];
+        const oldPlayer = data[ 'players' ][ data[ 'current_player_index' ] ];
 
-        if ( newData[ 'players' ][ data[ 'curent_player_index' ] ][ 'has_folded' ] ) {
-            foldCards( data[ 'curent_player_index' ] );
+        if ( newData[ 'players' ][ data[ 'current_player_index' ] ][ 'has_folded' ] ) {
+            foldCards( data[ 'current_player_index' ] );
             //fold
 
             showInfo( `Player ${ oldPlayer[ 'name' ] } has folded.` );
@@ -170,7 +170,7 @@ async function awaitYourTurn() {
 
             showInfo( `Player ${ oldPlayer[ 'name' ] } has raised by ${ newData[ 'current_required_bet' ] - data[ 'current_required_bet' ] }.` );
         }
-        else if ( newData[ 'players' ][ data[ 'curent_player_index' ] ][ 'current_bet' ] > oldPlayer[ 'current_bet' ] ) {
+        else if ( newData[ 'players' ][ data[ 'current_player_index' ] ][ 'current_bet' ] > oldPlayer[ 'current_bet' ] ) {
             //call
 
             showInfo( `Player ${ oldPlayer[ 'name' ] } has called.` );
@@ -189,7 +189,7 @@ async function awaitYourTurn() {
             tableCards();
         }
 
-        if( newData[ 'curent_player_index' ] == player.id ) {
+        if( newData[ 'current_player_index' ] == player.id ) {
             clearInterval( gameUpdateInterval );
             prepareMenu();
             return;
