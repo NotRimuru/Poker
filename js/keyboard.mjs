@@ -8,8 +8,10 @@ export function rotateCamera( keyboard, delta ) {
 
     rotationHelper.attach( player.camera );
 
-    if( player.id > 1 && player.id < 7 ) {
+    if( player.id > 2 && player.id < 7 ) {
         if( player.camera.rotation.x >= Math.PI - Math.PI * 0.25 || player.camera.rotation.x <= -Math.PI + Math.PI * 0.25 ) {
+            
+
             if( keyboard[ "arrowup" ] || keyboard[ "w" ] ) player.camera.rotateX( Math.PI * 0.3 * delta );
             if( keyboard[ "arrowdown" ] || keyboard[ "s" ] ) player.camera.rotateX( Math.PI * -0.3 * delta );
         }

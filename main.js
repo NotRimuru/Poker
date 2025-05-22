@@ -76,7 +76,6 @@ async function startGame() {
 
     let key = localStorage.getItem( 'key' );
     const table = await DATA.handleData( 'find', { key: key } );
-    console.log( table[ 'table' ] )
     if( table[ 'table' ] == -1 ) {
         key = await DATA.handleData( 'join', { name: localStorage.getItem( 'name' ), table: 0 } );
 
