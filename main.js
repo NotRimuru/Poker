@@ -96,7 +96,7 @@ async function waitForTheGame() {
 
     let key = localStorage.getItem( 'key' );
     const table = await DATA.handleData( 'find', { key: key } );
-    if( table[ 'table' ] == -1 ) {
+    if( key == undefined || table[ 'table' ] == -1 ) {
         key = await DATA.handleData( 'join', { name: localStorage.getItem( 'name' ), table: 0 } );
 
         if( key == "Failed" ) {
