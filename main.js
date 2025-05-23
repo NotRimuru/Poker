@@ -148,6 +148,7 @@ async function waitForTheGame() {
             }, 2000 );
 
             await DATA.handleData( 'start', { key: key } );
+            await DATA.handleData( 'start', { key: key } );
         } );
 
         document.body.appendChild( start );

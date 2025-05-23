@@ -9,7 +9,7 @@ export async function prepareMenu() {
 
     const slider = document.getElementById( 'slider' );
 
-    const min = data[ 'minimal_bid' ] < data[ 'current_required_bet' ] ? data[ 'current_required_bet' ] : data[ 'minimal_bid' ];
+    const min = data[ 'minimal_bid' ] < data[ 'current_required_bet' ] ? data[ 'current_required_bet' ] + 1 : data[ 'minimal_bid' ];
 
     slider.disabled = false;
     slider.min = min;
@@ -41,14 +41,16 @@ export async function prepareMenu() {
     raise.addEventListener( 'click', handleRaise );
 
     const action = document.getElementById( 'action' );
-    action.innerHTML = data[ 'current_required_bet' ] > 0 ? "Call" : "Check";
+    action.innerHTML = data[ 'current_required_bet' ] > 0 ? 'Call' : 'Check';
     action.addEventListener( 'click', handleAction );
 
-    if( data.player != 0 ) {
-        const start = document.getElementById( 'start' );
-    
-        if( start != null ) {
-            start.remove();
+    if( data[ 'current_required_bet' ] > data[ 'players' ][ player.id ][ 'chips' ] ) {
+        raise.removeEventListener( 'click', handleRaise );
+        raise.style.opacity = 0.5;
+
+        if( action.innerHTML == 'Call' ) {
+            action.removeEventListener( 'click', handleAction );
+            action.style.opacity = 0.5;
         }
     }
 
@@ -87,8 +89,17 @@ async function handleRaise() {
     disableMenu();
 
     const slider = document.getElementById( 'slider' );
-    const body = { key: player.key, action: { Raise: parseInt( slider.value ) } };
+    const sliderValue = parseInt( slider.value );
+    const body = { key: player.key, action: { Raise: sliderValue } };
     await handleData( 'action', body );
+
+    const bet = document.getElementById( 'bet' );
+    const betValue = parseFloat( bet.textContent.replace(/^\D+/g, '') );    
+    bet.textContent = `Bet: ${ betValue + sliderValue }`;
+
+    const balance = document.getElementById( 'balance' );
+    const balanceValue = parseFloat( balance.textContent.replace(/^\D+/g, '') );  
+    balance.textContent = `Balance: ${ balanceValue - sliderValue }`
 
     player.status = 'raise';
 
