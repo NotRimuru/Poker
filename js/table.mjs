@@ -14,7 +14,7 @@ function pot( value ) {
     const fontLoader = new FontLoader();
 
     fontLoader.load( 'assets/fonts/text.json', ( font ) => {
-        geometry = new TextGeometry( `pot: ${ value }`,
+        geometry = new TextGeometry( `Pot: ${ value }`,
             { 
                 size: 0.18,
                 depth: 0.01,
@@ -41,12 +41,45 @@ function pot( value ) {
     scene.add( sprite );
 }
 
+export function createTableSprite( value, name, y ) {
+    let geometry = new THREE.PlaneGeometry( 2, 0.5 );
+    let material = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 }); 
+    const sprite = new THREE.Mesh( geometry, material );
+    sprite.name = name;
 
-export function refreshPot( value ) {
-    const potSprite = scene.getObjectByName( 'pot' );
-    if( potSprite != undefined ) {
-        potSprite.removeFromParent();
-    }
-    
-    pot( value );
+    sprite.position.set( 0, y, 0 );
+
+    const fontLoader = new FontLoader();
+
+    fontLoader.load( 'assets/fonts/text.json', ( font ) => {
+        geometry = new TextGeometry( `${ name[ 0 ].toUpperCase() + name.slice( 1 ) }: ${ value }`,
+            { 
+                size: 0.18,
+                depth: 0.01,
+                curveSegments: 12,
+                bevelEnabled: true,
+                bevelThickness: 0.001,
+                bevelSize: 0.001,
+                bevelOffset: 0,
+                bevelSegments: 5,
+                font: font
+            } 
+        );
+        material = new THREE.MeshBasicMaterial({ color: 0x999999 });
+        const text = new THREE.Mesh( geometry, material );
+
+        sprite.add( text );
+
+        const boundingBox = new THREE.Box3().setFromObject( text );
+        const width = boundingBox.max.x - boundingBox.min.x;
+        text.position.set( ( -width / 2 ) - 0.08 , -0.07, 0 )
+    } );
+
+    sprite.lookAt( player.camera.position );
+    scene.add( sprite );
+}
+
+export function removeTableSprite( name ) {
+    const sprite = scene.getObjectByName( name );
+    sprite.removeFromParent();
 }

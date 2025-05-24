@@ -7,8 +7,7 @@ import { rotateCamera } from '/js/keyboard.mjs';
 import * as DATA from '/js/data.mjs';
 import * as CARDS from '/js/cards.mjs';
 import * as MENU from '/js/menu.mjs';
-import { refreshPot } from './js/table.mjs';
-import { deleteTableCards, tableCards } from './js/cards.mjs';
+import { createTableSprite } from './js/table.mjs';
  
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize( window.innerWidth, window.innerHeight );
@@ -81,7 +80,10 @@ async function startGame( data ) {
     }
 
     //show pot
-    refreshPot( data.pot );
+    createTableSprite( data.pot, 'pot', 2.5 );
+
+    //show bet
+    createTableSprite( data.current_required_bet, 'bet', 3 );
 
     //prepare ui
     MENU.prepareMenu();
@@ -134,17 +136,7 @@ async function waitForTheGame() {
             
             info.textContent = 'Starting the game!';
             setTimeout( () => {
-                info.animate( 
-                    [
-                        { opacity: 1 },
-                        { opacity: 0 }
-                    ], 
-                    {
-                        fill: 'forwards',
-                        duration: 200
-                    } 
-                )
-
+                infoAnimation( 'out' );
             }, 2000 );
 
             await DATA.handleData( 'start', { key: key } );
@@ -164,17 +156,7 @@ async function waitForTheGame() {
 
             info.textContent = 'Starting the game!';
             setTimeout( () => {
-                info.animate( 
-                    [
-                        { opacity: 1 },
-                        { opacity: 0 }
-                    ], 
-                    {
-                        fill: 'forwards',
-                        duration: 200
-                    } 
-                )
-
+                infoAnimation( 'out' )
             }, 2000 );
 
             clearInterval( gameUpdateInterval );    

@@ -78,36 +78,28 @@ export async function tableCards() {
 
         const card = DATA.scene.getObjectByName( `${ type }_table_card_${ number }` );
         
-        if( i < 5 ) {
+        const box3 = new THREE.Box3().setFromObject( card );
+        const width = box3.max.x - box3.min.x; 
+        const gap = 0.3;
 
+        if( i < 5 ) {
             const rotation = cardData == null ? 0.5 : -0.5;
-            
-            const box3 = new THREE.Box3().setFromObject( card );
-            const width = box3.max.x - box3.min.x; 
-            const gap = 0.3;
 
             card.rotation.set( Math.PI * rotation, 0, 0 );
             card.position.set( ( -( ( width + gap ) * 5 ) / 2 ) + ( width + gap ) * number, 0.927, 0 );
             
             continue;
         }
+        
         cardSprite.add( card );
 
         const rotation = cardData == null ? 1 : 0;
             
-        const box3 = new THREE.Box3().setFromObject( card );
-        const width = box3.max.x - box3.min.x; 
-        const gap = 0.3;
-
         card.rotation.set( Math.PI * rotation, 0, 0 );
         card.position.set( ( -( ( width + gap ) * 5 ) / 2 ) + ( width + gap ) * number + 0.375, 0, 0 );
     }
 
     cardSprite.lookAt( DATA.player.camera.position );
-
-    setTimeout( () => {
-        cardSprite.removeFromParent();
-    }, 3000 );
 }
 
 export function deleteTableCards() {
@@ -116,9 +108,6 @@ export function deleteTableCards() {
 
         card.removeFromParent();
     }
-
-    if( !DATA.scene.getObjectByName( 'card_sprite' ) ) return;
-    
     for( let i = 0; i < 5; i++ ) {
         const card = DATA.scene.getObjectByName( `sprite_table_card_${ i }` );
 

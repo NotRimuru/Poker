@@ -1,6 +1,6 @@
 import { player, handleData, scene } from '/js/data.mjs';
 import { tableCards, deleteTableCards, foldCards } from './cards.mjs';
-import { refreshPot } from './table.mjs';
+import { createTableSprite, removeTableSprite } from './table.mjs';
  
 export async function prepareMenu() {
 
@@ -23,7 +23,7 @@ export async function prepareMenu() {
     balance.innerHTML = `Balance: ${ data[ 'players' ][ player.id ][ 'chips' ] }`; 
 
     const bet = document.getElementById( 'bet' );
-    bet.innerHTML = `Bet: ${ data[ 'current_required_bet' ] }`; 
+    bet.innerHTML = `Bet: ${ data[ 'players' ][ player.id ][ 'current_bet' ] }`; 
 
     if( data.current_player_index != player.id ) {
         awaitYourTurn();
@@ -119,33 +119,33 @@ async function handleAction() {
     awaitYourTurn()
 }
 
-async function showInfo( text ) {
-    const info = document.getElementById( 'info' );
+export function infoAnimation( type ) {
+    const info = document.getElementById( 'info' )
+    const keyframes = [ 
+        { opacity: 0 },
+        { opacity: 1 }
+    ]
 
-    info.textContent = text;
+    if( type == 'out' ) keyframes.reverse();
 
     info.animate( 
-        [ 
-            { opacity: 0 },
-            { opacity: 1 }
-        ], 
+        keyframes,
         {
             duration: 150,
             fill: 'forwards'
         }
     );
+}
+
+async function showInfo( text ) {
+    const info = document.getElementById( 'info' );
+
+    info.textContent = text;
+
+    infoAnimation( 'in' );
 
     setTimeout( () => {
-        info.animate( 
-            [ 
-                { opacity: 1 },
-                { opacity: 0 }
-            ], 
-            {
-                duration: 150,
-                fill: 'forwards'
-            }
-        );
+        infoAnimation( 'out' );
     }, 5000);
 
 }
@@ -154,7 +154,11 @@ async function awaitYourTurn() {
     const body = { key: player.key };
     let data = await handleData( 'get_table', body );
 
-    refreshPot( data.pot );
+    removeTableSprite( 'pot' );
+    createTableSprite( data.pot, 'pot', 2.5 );
+
+    removeTableSprite( 'bet' );
+    createTableSprite( data.current_required_bet, 'bet', 3 );
 
     const gameUpdateInterval = setInterval( async () => {
 
@@ -164,7 +168,11 @@ async function awaitYourTurn() {
         if( newData[ 'current_player_index' ] == data[ 'current_player_index' ]  ) return;
 
         console.log( 'next player turn!' );
-        refreshPot( data.pot );
+        removeTableSprite( 'pot' );
+        createTableSprite( data.pot, 'pot', 2.5 );
+
+        removeTableSprite( 'bet' );
+        createTableSprite( data.current_required_bet, 'bet', 3 );
 
         const oldPlayer = data[ 'players' ][ data[ 'current_player_index' ] ];
 
