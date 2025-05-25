@@ -45,5 +45,7 @@ export function createTableSprite( value, name, y, showName ) {
 
 export function removeTableSprite( name ) {
     const sprite = scene.getObjectByName( name );
+
+    if( sprite == undefined ) return;
     sprite.removeFromParent();
 }

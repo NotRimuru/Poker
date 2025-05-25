@@ -231,10 +231,6 @@ async function win( oldData, newData ) {
                 if( newData.players[ i ] == null ) break;
 
                 scene.getObjectByName( `player_cards_${ i }` ).removeFromParent();
-            }
-            for( let i = 0; i < newData.players.length; i++ ) {
-                if( newData.players[ i ] == null ) break;
-
                 playerCards( i );
             }
 
