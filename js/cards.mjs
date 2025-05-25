@@ -90,7 +90,7 @@ export async function tableCards() {
             
             continue;
         }
-        
+
         cardSprite.add( card );
 
         const rotation = cardData == null ? 1 : 0;
@@ -105,6 +105,8 @@ export async function tableCards() {
 export function deleteTableCards() {
     for( let i = 0; i < 5; i++ ) {
         const card = DATA.scene.getObjectByName( `mesh_table_card_${ i }` );
+
+        if( card == undefined ) continue;
 
         card.removeFromParent();
     }
@@ -129,6 +131,7 @@ export async function playerCards( id ) {
     const data = await DATA.handleData( 'get_table', body );
 
     const group = new THREE.Mesh( new THREE.BoxGeometry( 1, 1, 1 ), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 }) )
+    group.name = `player_cards_${ id }`;
     group.position.set( DATA.playerTransform[ id ][ 0 ] , 0.927, DATA.playerTransform[ id ][ 2 ] );
 
     for( let i = 0; i < 2; i++ ) {
@@ -168,4 +171,27 @@ export function rotateCards( revealed ) {
         const rotation = revealed ? -1 : 1
         card.rotateX( Math.PI * rotation );
     }
+}
+
+export function createBestHand( hand, y ) {
+    const group = new THREE.Mesh( new THREE.BoxGeometry( 1, 1, 1 ), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 }) );
+    group.name = 'winning_hand_cards';
+
+    group.position.set( 0, y, 0 )
+
+    for( let i = 0; i < hand.length; i++ ) {
+        createCard( hand[ i ].color, hand[ i ].rank, `winning_hand_card_${ i }` );
+        const card = DATA.scene.getObjectByName( `winning_hand_card_${ i }` );
+
+        const box3 = new THREE.Box3().setFromObject( card );
+        const width = box3.max.x - box3.min.x; 
+        const gap = 0.6;
+
+        group.add( card );
+        card.position.set( -( width + ( gap / 2 ) ) + ( width + gap * i ), 0, 0 );
+    }
+
+    group.lookAt( DATA.player.camera.position );
+
+    DATA.scene.add( group );
 }

@@ -1,50 +1,52 @@
 import { player, handleData, scene } from '/js/data.mjs';
-import { tableCards, deleteTableCards, foldCards } from './cards.mjs';
+import { tableCards, deleteTableCards, foldCards, createBestHand, playerCards } from './cards.mjs';
 import { createTableSprite, removeTableSprite } from './table.mjs';
- 
+
+let globalData;
+
 export async function prepareMenu() {
 
     const body = { key: player.key };
-    const data = await handleData( 'get_table', body );
+    globalData = await handleData( 'get_table', body );
 
     const slider = document.getElementById( 'slider' );
 
-    const min = data[ 'minimal_bid' ] < data[ 'current_required_bet' ] ? data[ 'current_required_bet' ] + 1 : data[ 'minimal_bid' ];
+    const min = globalData[ 'minimal_bid' ] < globalData[ 'current_required_bet' ] ? globalData[ 'current_required_bet' ] + 1 : globalData[ 'minimal_bid' ];
 
     slider.disabled = false;
     slider.min = min;
-    slider.max = data[ 'players' ][ player.id ][ 'chips' ];
+    slider.max = globalData[ 'players' ][ player.id ][ 'chips' ];
     slider.value = slider.min;
 
     const output = slider.nextElementSibling;
     output.value = slider.min;
 
     const balance = document.getElementById( 'balance' );
-    balance.innerHTML = `Balance: ${ data[ 'players' ][ player.id ][ 'chips' ] }`; 
+    balance.innerHTML = `Balance: ${ globalData[ 'players' ][ player.id ][ 'chips' ] }`; 
 
     const bet = document.getElementById( 'bet' );
-    bet.innerHTML = `Bet: ${ data[ 'players' ][ player.id ][ 'current_bet' ] }`; 
+    bet.innerHTML = `Bet: ${ globalData[ 'players' ][ player.id ][ 'current_bet' ] }`; 
 
-    if( data.current_player_index != player.id ) {
+    if( globalData.current_player_index != player.id ) {
         awaitYourTurn();
         disableMenu();
         return;
     } 
 
-    if( data.players[ player.id ][ 'has_folded' ] == true ) return;
+    if( globalData.players[ player.id ][ 'has_folded' ] == true ) return;
 
     const fold = document.getElementById( 'fold' );
     fold.addEventListener( 'click', handleFold );
 
     const raise = document.getElementById( 'raise' );
-    raise.innerHTML = data[ 'current_required_bet' ] > 0 ? 'Raise' : 'Bet';
+    raise.innerHTML = globalData[ 'current_required_bet' ] > 0 ? 'Raise' : 'Bet';
     raise.addEventListener( 'click', handleRaise );
 
     const action = document.getElementById( 'action' );
-    action.innerHTML = data[ 'current_required_bet' ] > 0 ? 'Call' : 'Check';
+    action.innerHTML = globalData[ 'current_required_bet' ] > 0 ? 'Call' : 'Check';
     action.addEventListener( 'click', handleAction );
 
-    if( data[ 'current_required_bet' ] > data[ 'players' ][ player.id ][ 'chips' ] ) {
+    if( globalData[ 'current_required_bet' ] > globalData[ 'players' ][ player.id ][ 'chips' ] ) {
         raise.removeEventListener( 'click', handleRaise );
         raise.style.opacity = 0.5;
 
@@ -147,32 +149,154 @@ async function showInfo( text ) {
     setTimeout( () => {
         infoAnimation( 'out' );
     }, 5000);
+}
 
+async function win( oldData, newData ) {
+
+    console.log( newData )
+
+    let winningPlayers = [];
+    for( let i = 0; i < 8; i++ ) {
+        if( oldData[ 'players' ][ i ] == null ) break;
+
+        console.log( oldData[ 'players' ][ i ][ 'chips' ], newData[ 'players' ][ i ][ 'chips' ], !( newData[ 'players' ][ i ][ 'chips' ] > oldData[ 'players' ][ i ][ 'chips' ] ) )
+        if( !( newData[ 'players' ][ i ][ 'chips' ] > oldData[ 'players' ][ i ][ 'chips' ] ) ) continue;
+
+        createTableSprite( newData[ 'players' ][ i ][ 'name' ] ,`winning_player_${ winningPlayers.length }`, 3.5 + ( 0.5 * winningPlayers.length ), false );
+        winningPlayers.push( i );
+    }
+
+    console.log( winningPlayers )
+
+    createTableSprite( 'Winning Players:', 'winning_players_text', 3.5 + ( 0.5 * winningPlayers.length ), false );
+
+    createBestHand( newData[ 'players' ][ winningPlayers[ 0 ] ][ 'cards' ], 4.25 + ( 0.5 * winningPlayers.length ) );
+    createTableSprite( newData[ 'players' ][ winningPlayers[ 0 ] ][ 'best_hand' ][ 'hand_type' ], 'winning_hand_type', 5 + ( 0.5 * winningPlayers.length ), false );
+    createTableSprite( 'Winning Hand:', 'winning_hand_text', 5.5 + ( 0.5 * winningPlayers.length ), false );
+
+    const info = document.getElementById( 'info' );
+    info.textContent = 'Waiting for new round to start!';
+    infoAnimation( 'in' );
+
+    if( player.id == 0 ) {
+        const start = document.getElementById( 'start' );
+
+        if( start != undefined ) {
+            start.style.opacity = 1;
+        }
+        else {
+            const start = document.createElement( 'div' );
+            start.id = 'start';
+            start.textContent = 'Start';
+
+            start.addEventListener( 'click', async () => {
+                start.style.opacity = 0;
+                
+                info.textContent = 'Starting the game!';
+                setTimeout( () => {
+                    infoAnimation( 'out' );
+                }, 2000 );
+
+                await handleData( 'start', { key: player.key } );
+                await handleData( 'start', { key: player.key } );
+            } );
+
+            document.body.appendChild( start );
+        }
+    }
+
+    const gameUpdateInterval = setInterval( async () => {
+        const body = { key: player.key };
+        const newData = await handleData( 'get_table', body );
+        
+        if( newData[ 'is_game_running' ] ) {
+
+            removeTableSprite( 'winning_players_text' );
+            removeTableSprite( 'winning_hand_type' );
+            removeTableSprite( 'winning_hand_text' );
+            removeTableSprite( 'winning_hand_cards' );
+
+            for( let i = 0; i < winningPlayers.length; i++ ) {
+                removeTableSprite( `winning_player_${ i }` );
+            }
+            
+            //refresh table cards
+            deleteTableCards();
+            tableCards();
+
+            //refresh player cards
+            for( let i = 0; i < newData.players.length; i++ ) {
+                if( newData.players[ i ] == null ) break;
+
+                scene.getObjectByName( `player_cards_${ i }` );
+
+                for( let j = 0; j < 2; j++ ) {
+                    `player_card_${ i }_${ j }`;
+                }
+            }
+            for( let i = 0; i < newData.players.length; i++ ) {
+                if( newData.players[ i ] == null ) break;
+
+                playerCards( i );
+            }
+
+            //show pot
+            removeTableSprite( 'pot' );
+            createTableSprite( newData.pot, 'pot', 2.5, true );
+
+            //show bet
+            removeTableSprite( 'bet' );
+            createTableSprite( newData.current_required_bet, 'bet', 3, true );
+
+            //prepare ui
+            prepareMenu();
+
+            info.textContent = 'Starting the game!';
+            setTimeout( () => {
+                infoAnimation( 'out' )
+            }, 2000 );
+
+            clearInterval( gameUpdateInterval );    
+        }
+    } , 5000);
 }
 
 async function awaitYourTurn() {
     const body = { key: player.key };
-    let data = await handleData( 'get_table', body );
+    const data = await handleData( 'get_table', body );
+
+    console.log( data )
 
     removeTableSprite( 'pot' );
-    createTableSprite( data.pot, 'pot', 2.5 );
+    createTableSprite( data.pot, 'pot', 2.5, true );
 
     removeTableSprite( 'bet' );
-    createTableSprite( data.current_required_bet, 'bet', 3 );
+    createTableSprite( data.current_required_bet, 'bet', 3, true  );
 
     const gameUpdateInterval = setInterval( async () => {
 
-        console.log( 'update' );
         const newData = await handleData( 'get_table', body );
+
+        if( !newData[ 'is_game_running' ] ) {
+            clearInterval( gameUpdateInterval );
+
+            console.log( globalData )
+            if( globalData[ 'current_player_index' ] == player.id ) {
+                win( globalData, newData );
+                return;
+            }
+
+            win( data, newData );
+            return;
+        }
         
         if( newData[ 'current_player_index' ] == data[ 'current_player_index' ]  ) return;
 
-        console.log( 'next player turn!' );
         removeTableSprite( 'pot' );
-        createTableSprite( data.pot, 'pot', 2.5 );
+        createTableSprite( data.pot, 'pot', 2.5, true );
 
         removeTableSprite( 'bet' );
-        createTableSprite( data.current_required_bet, 'bet', 3 );
+        createTableSprite( data.current_required_bet, 'bet', 3, true );
 
         const oldPlayer = data[ 'players' ][ data[ 'current_player_index' ] ];
 

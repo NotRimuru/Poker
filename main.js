@@ -80,10 +80,10 @@ async function startGame( data ) {
     }
 
     //show pot
-    createTableSprite( data.pot, 'pot', 2.5 );
+    createTableSprite( data.pot, 'pot', 2.5, true );
 
     //show bet
-    createTableSprite( data.current_required_bet, 'bet', 3 );
+    createTableSprite( data.current_required_bet, 'bet', 3, true );
 
     //prepare ui
     MENU.prepareMenu();
@@ -132,11 +132,11 @@ async function waitForTheGame() {
         start.textContent = 'Start';
 
         start.addEventListener( 'click', async () => {
-            start.style.display = 'none';
+            start.style.opacity = 0;
             
             info.textContent = 'Starting the game!';
             setTimeout( () => {
-                infoAnimation( 'out' );
+                MENU.infoAnimation( 'out' );
             }, 2000 );
 
             await DATA.handleData( 'start', { key: key } );
@@ -156,7 +156,7 @@ async function waitForTheGame() {
 
             info.textContent = 'Starting the game!';
             setTimeout( () => {
-                infoAnimation( 'out' )
+                MENU.infoAnimation( 'out' )
             }, 2000 );
 
             clearInterval( gameUpdateInterval );    
