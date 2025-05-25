@@ -153,20 +153,16 @@ async function showInfo( text ) {
 
 async function win( oldData, newData ) {
 
-    console.log( newData )
 
     let winningPlayers = [];
     for( let i = 0; i < 8; i++ ) {
         if( oldData[ 'players' ][ i ] == null ) break;
 
-        console.log( oldData[ 'players' ][ i ][ 'chips' ], newData[ 'players' ][ i ][ 'chips' ], !( newData[ 'players' ][ i ][ 'chips' ] > oldData[ 'players' ][ i ][ 'chips' ] ) )
         if( !( newData[ 'players' ][ i ][ 'chips' ] > oldData[ 'players' ][ i ][ 'chips' ] ) ) continue;
 
         createTableSprite( newData[ 'players' ][ i ][ 'name' ] ,`winning_player_${ winningPlayers.length }`, 3.5 + ( 0.5 * winningPlayers.length ), false );
         winningPlayers.push( i );
     }
-
-    console.log( winningPlayers )
 
     createTableSprite( 'Winning Players:', 'winning_players_text', 3.5 + ( 0.5 * winningPlayers.length ), false );
 
@@ -259,8 +255,6 @@ async function awaitYourTurn() {
     const body = { key: player.key };
     const data = await handleData( 'get_table', body );
 
-    console.log( data )
-
     removeTableSprite( 'pot' );
     createTableSprite( data.pot, 'pot', 2.5, true );
 
@@ -274,7 +268,6 @@ async function awaitYourTurn() {
         if( !newData[ 'is_game_running' ] ) {
             clearInterval( gameUpdateInterval );
 
-            console.log( globalData )
             if( globalData[ 'current_player_index' ] == player.id ) {
                 win( globalData, newData );
                 return;

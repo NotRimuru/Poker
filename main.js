@@ -114,8 +114,6 @@ async function waitForTheGame() {
     const data = await DATA.handleData( 'get_table', { key: key } );
     DATA.player.setId( data[ 'player' ] );
 
-    console.log( data );
-
     DATA.player.camera.position.set( DATA.playerTransform[ DATA.player.id ][ 0 ], DATA.playerTransform[ DATA.player.id ][ 1 ], DATA.playerTransform[ DATA.player.id ][ 2 ] );
     DATA.player.camera.rotation.set( 0, DATA.playerTransform[ DATA.player.id ][ 3 ] * 3.2, 0 );
 
