@@ -143,3 +143,23 @@ body {
 #player-info > #balance {
     left: 30%;
 }
+
+#exit {
+    height: 10lvh;
+    aspect-ratio: 1;
+
+    position: absolute;
+    transform: translate( -50%, -50% );
+    top: 10lvh;
+    left: 10lvh;
+
+    border-radius: 1lvh;
+
+    background-color: #333;
+    color: #fff;
+
+    font-size: 3lvh;
+
+    align-content: center;
+    text-align: center;
+}

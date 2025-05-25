@@ -8,6 +8,8 @@ import * as DATA from '/js/data.mjs';
 import * as CARDS from '/js/cards.mjs';
 import * as MENU from '/js/menu.mjs';
 import { createTableSprite } from './js/table.mjs';
+import { player } from './js/data.mjs';
+import { infoAnimation } from './js/menu.mjs';
  
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize( window.innerWidth, window.innerHeight );
@@ -133,20 +135,34 @@ async function waitForTheGame() {
 
         start.addEventListener( 'click', async () => {
             start.style.opacity = 0;
-            
+
             info.textContent = 'Starting the game!';
-            setTimeout( () => {
+            const infoTimeout = setTimeout( () => {
                 MENU.infoAnimation( 'out' );
             }, 2000 );
 
-            await DATA.handleData( 'start', { key: key } );
+            const status = await DATA.handleData( 'start', { key: key } );
+            if( status == "Failed" ) {
+                start.style.opacity = 1;
+                clearTimeout( infoTimeout );
+
+                info.textContent = 'You atleast 3 people to start the game!';
+                setTimeout( () => {
+                    MENU.infoAnimation( 'out' );
+
+                    info.textContent = 'Waiting for the game to start!';
+                    MENU.infoAnimation( 'in' );
+                }, 3000 );
+
+                return;
+            }
             await DATA.handleData( 'start', { key: key } );
         } );
 
         document.body.appendChild( start );
     }
 
-    const gameUpdateInterval = setInterval( async () => {
+    DATA.player.gameloop = setInterval( async () => {
         const body = { key: DATA.player.key };
         const newData = await DATA.handleData( 'get_table', body );
         
@@ -159,7 +175,7 @@ async function waitForTheGame() {
                 MENU.infoAnimation( 'out' )
             }, 2000 );
 
-            clearInterval( gameUpdateInterval );    
+            clearInterval( DATA.player.gameloop );    
             return;
         }
     } , 5000);
@@ -169,6 +185,17 @@ waitForTheGame();
 
 const clock = new THREE.Clock();
 let delta;
+
+const exit = document.getElementById( 'exit' );
+exit.addEventListener( 'click', async () => {
+    await DATA.handleData( 'exit', { key: DATA.player.key } );
+
+    clearInterval( DATA.player.gameloop );
+
+    const info = document.getElementById( 'info' );
+    info.textContent = 'You quit the table!';
+    MENU.infoAnimation( 'in' );
+} );
 
 function animate() {
 

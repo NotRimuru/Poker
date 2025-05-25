@@ -52,7 +52,7 @@ export async function handleData( location, body ) {
             body: JSON.stringify( body )
         });
 
-        if( response.status == 403 ){
+        if( response.status == 403 || response.status == 425 ) {
             return "Failed";
         }
 
@@ -77,6 +77,7 @@ class Player {
         this.id = id;
         this.status = status;
         this.camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 100 );
+        this.gameloop = null;
     }
 
     setKey( key ) {

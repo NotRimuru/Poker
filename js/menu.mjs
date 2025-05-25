@@ -205,7 +205,7 @@ async function win( oldData, newData ) {
         }
     }
 
-    const gameUpdateInterval = setInterval( async () => {
+    player.gameloop = setInterval( async () => {
         const body = { key: player.key };
         const newData = await handleData( 'get_table', body );
         
@@ -256,7 +256,7 @@ async function win( oldData, newData ) {
                 infoAnimation( 'out' )
             }, 2000 );
 
-            clearInterval( gameUpdateInterval );    
+            clearInterval( player.gameloop );    
         }
     } , 5000);
 }
