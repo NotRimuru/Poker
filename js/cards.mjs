@@ -113,6 +113,8 @@ export function deleteTableCards() {
     for( let i = 0; i < 5; i++ ) {
         const card = DATA.scene.getObjectByName( `sprite_table_card_${ i }` );
 
+        if( card == undefined ) continue;
+
         card.removeFromParent();
     }
 }

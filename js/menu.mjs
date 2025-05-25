@@ -43,7 +43,7 @@ export async function prepareMenu() {
     raise.addEventListener( 'click', handleRaise );
 
     const action = document.getElementById( 'action' );
-    action.innerHTML = globalData[ 'current_required_bet' ] > 0 ? 'Call' : 'Check';
+    action.innerHTML = globalData[ 'current_required_bet' ] > 0 && globalData[ 'current_required_bet' ] != globalData[ 'players' ][ player.id ][ 'current_bet' ] ? 'Call' : 'Check';
     action.addEventListener( 'click', handleAction );
 
     if( globalData[ 'current_required_bet' ] > globalData[ 'players' ][ player.id ][ 'chips' ] ) {
@@ -211,6 +211,8 @@ async function win( oldData, newData ) {
         
         if( newData[ 'is_game_running' ] ) {
 
+            player.status = 'none';
+
             removeTableSprite( 'winning_players_text' );
             removeTableSprite( 'winning_hand_type' );
             removeTableSprite( 'winning_hand_text' );
@@ -228,11 +230,7 @@ async function win( oldData, newData ) {
             for( let i = 0; i < newData.players.length; i++ ) {
                 if( newData.players[ i ] == null ) break;
 
-                scene.getObjectByName( `player_cards_${ i }` );
-
-                for( let j = 0; j < 2; j++ ) {
-                    `player_card_${ i }_${ j }`;
-                }
+                scene.getObjectByName( `player_cards_${ i }` ).removeFromParent();
             }
             for( let i = 0; i < newData.players.length; i++ ) {
                 if( newData.players[ i ] == null ) break;
