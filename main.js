@@ -101,11 +101,21 @@ async function waitForTheGame() {
     let key = localStorage.getItem( 'key' );
     const table = await DATA.handleData( 'find', { key: key } );
     if( key == undefined || table[ 'table' ] == -1 ) {
+        const params = new URLSearchParams( window.location.search );
+        const value = parseInt( params.get('id') );
+
+        if( value == undefined ) {
+            console.log( 'fail' );
+            return;
+        }
+
         key = await DATA.handleData( 'join', { name: localStorage.getItem( 'name' ), table: 0 } );
 
         if( key == "Failed" ) {
-            key = await DATA.handleData( 'create', { name: localStorage.getItem( 'name' ) } );
+            console.log( 'fail' );
+            return;
         }
+
         localStorage.setItem( 'key', key );
     }
 
