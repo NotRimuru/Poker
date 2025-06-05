@@ -3,7 +3,7 @@ async function handle_data( location, body ) {
     myHeaders.append( 'Content-Type', 'application/json' );
 
     try {
-        const response = await fetch( `http://localhost:3000/${ location }`, {
+        const response = await fetch( `https://poker.shizue.dev/api/${ location }`, {
             method: 'POST',
             headers: myHeaders,
             body: JSON.stringify( body )

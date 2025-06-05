@@ -257,7 +257,7 @@ exit.addEventListener( 'click', async () => {
     info.textContent = 'You quit the table!';
     MENU.infoAnimation( 'in' );
 
-    location.replace( `http://localhost:5500` );
+    location.replace( `https://poker.shizue.dev/` );
 } );
 
 function animate() {
