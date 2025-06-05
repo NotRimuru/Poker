@@ -60,7 +60,7 @@ export async function prepareMenu() {
     
     const slider = document.getElementById( 'slider' );
 
-    const min = globalData[ 'minimal_bid' ] < globalData[ 'current_required_bet' ] ? globalData[ 'current_required_bet' ] + 1 : globalData[ 'minimal_bid' ];
+    const min = globalData[ 'minimal_bid' ] < globalData[ 'current_required_bet' ] ? globalData[ 'current_required_bet' ] + 1 : globalData[ 'minimal_bid' ] + 1;
 
     slider.disabled = false;
     slider.min = min;
@@ -297,6 +297,8 @@ async function win( oldData, newData ) {
                 infoAnimation( 'out' )
             }, 2000 );
 
+            awaitYourTurn();
+
             clearInterval( player.gameloop );    
         }
     } , 5000);
@@ -331,10 +333,10 @@ export async function awaitYourTurn() {
         if( newData[ 'current_player_index' ] == data[ 'current_player_index' ]  ) return;
 
         removeTableSprite( 'pot' );
-        createTableSprite( data.pot, 'pot', 2.5, true );
+        createTableSprite( newData.pot, 'pot', 2.5, true );
 
         removeTableSprite( 'bet' );
-        createTableSprite( data.current_required_bet, 'bet', 3, true );
+        createTableSprite( newData.current_required_bet, 'bet', 3, true );
 
         const oldPlayer = data[ 'players' ][ data[ 'current_player_index' ] ];
 
