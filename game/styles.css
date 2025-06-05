@@ -163,3 +163,102 @@ body {
     align-content: center;
     text-align: center;
 }
+
+/* edit menu ---------------------------------------------------------------------------------------------------------------------------------- */
+
+#edit-menu {
+    position: absolute;
+
+    transform: translate( -50%, -50% );
+    top: 50%;
+    left: 10%;
+
+    display: flex;
+    flex-direction: column;
+    gap: 1lvh;
+}
+
+#edit {
+    height: 8lvh;
+    width: 8lvh;
+
+    background-color: #202020;
+
+    border-radius: 2lvh;
+
+    align-self: center;
+
+    position: relative;
+}
+
+#name, #minimal-bid, #starting-chips {
+    height: 3lvh;
+    width: 8lvw;
+
+    background-color: #202020;
+    color: #eee;
+
+    border: none;
+    border-radius: 1lvh;
+
+    font-size: 1.5lvh;
+
+    padding-left: 0.8lvh;
+
+    outline: solid #292929 0.3lvh;
+}
+
+#name, #id, #starting-chips {
+    outline: #333 solid 0.3lvh;
+}
+
+#max-players {
+    background-color: #393939;
+    accent-color: #eee;
+}
+
+.label-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 1lvh;
+
+    justify-items: center;
+
+    background-color: #202020;
+
+    padding: 1lvh;
+    border-radius: 1lvh;
+}
+
+label {
+    align-self: center;
+
+    color: #777;
+    font-size: 1.7lvh;
+}
+
+#range-input-wrapper {
+    display: flex;
+}
+
+#max-players-output {
+    margin-left: 1lvh;
+
+    font-size: 2lvh;
+    color: #eee;
+}
+
+#buttons-wrapper {
+    display: flex;
+    gap: 2lvh;
+}
+
+.image {
+    height: 70%; 
+    width: 70%;
+
+    position: absolute;
+    transform: translate( -50%, -50% );
+    top: 50%;
+    left: 50%;
+}

@@ -1,217 +1,156 @@
-//three js imports
-import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+async function handle_data( location, body ) {
+    const myHeaders = new Headers();
+    myHeaders.append( 'Content-Type', 'application/json' );
 
-//js files imports
-import { rotateCamera } from '/js/keyboard.mjs';
-import * as DATA from '/js/data.mjs';
-import * as CARDS from '/js/cards.mjs';
-import * as MENU from '/js/menu.mjs';
-import { createTableSprite } from './js/table.mjs';
-import { player } from './js/data.mjs';
-import { infoAnimation } from './js/menu.mjs';
- 
-const renderer = new THREE.WebGLRenderer();
-renderer.setSize( window.innerWidth, window.innerHeight );
-document.body.appendChild( renderer.domElement );
+    try {
+        const response = await fetch( `http://localhost:3000/${ location }`, {
+            method: 'POST',
+            headers: myHeaders,
+            body: JSON.stringify( body )
+        });
 
-window.onresize = () => {
-    DATA.player.camera.aspect = window.innerWidth / window.innerHeight;
-    DATA.player.camera.updateProjectionMatrix();
-
-    renderer.setSize(window.innerWidth, window.innerHeight);
-}
-
-const light = new THREE.HemisphereLight( 0xffffff, 0x444444, 4 );
-light.position.set( 0, 4, 0 );
-DATA.scene.add( light );
-
-const gltfLoader = new GLTFLoader();
-
-gltfLoader.load( 'assets/models/table.glb', ( gltf ) => {
-    const table = gltf.scene;
-
-    table.rotateY( Math.PI * 0.5 );
-    table.scale.set( 3, 3, 3 );
-
-    table.position.set( 0, 0.5, 0 );
-    table.name = 'table';
-
-    DATA.scene.add( table );
-} );
-
-for( let i = 0; i < DATA.playerTransform.length; i++ ) {
-    gltfLoader.load( 'assets/models/chair.glb', ( gltf ) => {
-        const chair = gltf.scene;
-    
-        chair.rotateY( Math.PI + ( Math.PI * DATA.playerTransform[ i ][ 3 ] ) );
-        chair.scale.set( 0.5, 0.5, 0.5 );
-        chair.position.set( DATA.playerTransform[ i ][ 0 ], 0, DATA.playerTransform[ i ][ 2 ] );
-    
-        DATA.scene.add( chair );
-    } );
-}
-
-let keyboard = {};
-window.onkeydown = ( e ) => {
-    const key = e.key.toLowerCase();
-
-    if( key == ' ' && !keyboard[ key ] ) CARDS.rotateCards( true );
-
-    keyboard[ key ] = true;
-}
-
-window.onkeyup = ( e ) => {
-    const key = e.key.toLowerCase();
-
-    if( key == ' ' && keyboard[ key ] ) CARDS.rotateCards( false );
-
-    keyboard[ key ] = false;
-}
-
-async function startGame( data ) {
-
-    //spawn table cards
-    CARDS.tableCards();
-
-    //spawn player cards
-    for( let i = 0; i < data.players.length; i++ ) {
-        if( data.players[ i ] == null ) break;
-
-        CARDS.playerCards( i );
-    }
-
-    //show pot
-    createTableSprite( data.pot, 'pot', 2.5, true );
-
-    //show bet
-    createTableSprite( data.current_required_bet, 'bet', 3, true );
-
-    //prepare ui
-    MENU.prepareMenu();
-}
-
-async function waitForTheGame() {
-    
-    if( !localStorage.getItem( 'name' ) ) {
-        const name = prompt( 'Podaj imie: ', );
-        localStorage.setItem( 'name', name );
-    }
-
-    let key = localStorage.getItem( 'key' );
-    const table = await DATA.handleData( 'find', { key: key } );
-    if( key == undefined || table[ 'table' ] == -1 ) {
-        const params = new URLSearchParams( window.location.search );
-        const value = parseInt( params.get('id') );
-
-        if( value == undefined ) {
-            console.log( 'fail' );
-            return;
+        if( response.status == 403 || response.status == 425 ) {
+            return 'Failed';
         }
 
-        key = await DATA.handleData( 'join', { name: localStorage.getItem( 'name' ), table: 0 } );
-
-        if( key == "Failed" ) {
-            console.log( 'fail' );
-            return;
+        if (!response.ok) {
+            throw new Error(`Response status: ${response.status}`);
         }
 
-        localStorage.setItem( 'key', key );
-    }
-
-    DATA.player.setKey( key );
-
-    const data = await DATA.handleData( 'get_table', { key: key } );
-    DATA.player.setId( data[ 'player' ] );
-
-    DATA.player.camera.position.set( DATA.playerTransform[ DATA.player.id ][ 0 ], DATA.playerTransform[ DATA.player.id ][ 1 ], DATA.playerTransform[ DATA.player.id ][ 2 ] );
-    DATA.player.camera.rotation.set( 0, DATA.playerTransform[ DATA.player.id ][ 3 ] * 3.2, 0 );
-
-    if( data[ 'is_game_running' ] ) {
-        startGame( data );
-        return;
-    }
-
-    const info = document.getElementById( 'info' );
-    info.textContent = 'Waiting for the game to start!';
-    info.style.opacity = 1;
-
-    if( DATA.player.id == 0 ) {
-        const start = document.createElement( 'div' );
-        start.id = 'start';
-        start.textContent = 'Start';
-
-        start.addEventListener( 'click', async () => {
-            start.style.opacity = 0;
-
-            info.textContent = 'Starting the game!';
-            const infoTimeout = setTimeout( () => {
-                MENU.infoAnimation( 'out' );
-            }, 2000 );
-
-            const status = await DATA.handleData( 'start', { key: key } );
-            if( status == "Failed" ) {
-                start.style.opacity = 1;
-                clearTimeout( infoTimeout );
-
-                info.textContent = 'You atleast 3 people to start the game!';
-                setTimeout( () => {
-                    MENU.infoAnimation( 'out' );
-
-                    info.textContent = 'Waiting for the game to start!';
-                    MENU.infoAnimation( 'in' );
-                }, 3000 );
-
-                return;
-            }
-            await DATA.handleData( 'start', { key: key } );
-        } );
-
-        document.body.appendChild( start );
-    }
-
-    DATA.player.gameloop = setInterval( async () => {
-        const body = { key: DATA.player.key };
-        const newData = await DATA.handleData( 'get_table', body );
+        let result;
+        if( location == 'search' ) result = response.json();
+        else if( location == 'create' ) result = response.text();
         
-        if( newData[ 'is_game_running' ] ) {
-            
-            startGame( newData );
+        return result;
 
-            info.textContent = 'Starting the game!';
-            setTimeout( () => {
-                MENU.infoAnimation( 'out' )
-            }, 2000 );
-
-            clearInterval( DATA.player.gameloop );    
-            return;
-        }
-    } , 5000);
+    } catch( error ) {
+        console.error( 'Fetch error:', error.message );
+    }
 }
 
-waitForTheGame();
+async function show_avaliavble_tables( tables ) {
+    const main = document.getElementById( 'main' );
 
-const clock = new THREE.Clock();
-let delta;
+    const person_transform = [
+        [ 30, 100 ],
+        [ 70, 100 ],
+        [ 95, 85 ],
+        [ 95, 15 ],
+        [ 70, 0 ],
+        [ 30, 0 ],
+        [ 5, 15 ],
+        [ 5, 85 ]
+    ];
 
-const exit = document.getElementById( 'exit' );
-exit.addEventListener( 'click', async () => {
-    await DATA.handleData( 'exit', { key: DATA.player.key } );
+    for( let i = 0; i < tables.length; i++ ) {
+        const table_wrapper_div = document.createElement( 'div' );
+        table_wrapper_div.classList.add( 'table-wrapper' );
 
-    clearInterval( DATA.player.gameloop );
+        const table_div = document.createElement( 'div' );
+        table_div.classList.add( 'table' );
 
-    const info = document.getElementById( 'info' );
-    info.textContent = 'You quit the table!';
-    MENU.infoAnimation( 'in' );
+        const table_text_div = document.createElement( 'div' );
+        table_text_div.classList.add( 'text' );
+        table_text_div.innerHTML = `
+            name:</br>
+            id:</br>
+            current players:</br>
+            max players:</br>
+            minimal bid:</br>
+            starting chips:</br>
+        `;
+        table_wrapper_div.appendChild( table_text_div );
+
+        const table_info = tables[ i ];
+        const table_info_div = document.createElement( 'div' );
+        table_info_div.classList.add( 'table-info' );
+        table_info_div.innerHTML = `
+            ${ table_info.name } </br>
+            ${ table_info.id } </br>
+            ${ table_info.current_players } </br>
+            ${ table_info.max_players } </br>
+            ${ table_info.minimal_bid } </br>
+            ${ table_info.starting_chips } </br>
+        `;
+        table_wrapper_div.appendChild( table_info_div );
+
+        for( let j = 0; j < table_info.max_players; j++ ) {
+            const person_div = document.createElement( 'div' );
+            person_div.classList.add( 'person' );
+
+            person_div.style[ 'left' ] = `${ person_transform[ j ][ 0 ] }%`;
+            person_div.style[ 'top' ] = `${ person_transform[ j ][ 1 ] }%`;
+
+            table_div.appendChild( person_div );    
+            if( table_info.current_players <= j ) continue;
+            
+            person_div.style[ 'background-color' ] = '#ccc';
+
+            const person_image = document.createElement( 'img' );
+            person_image.src = 'png/user.png';
+            person_image.classList.add( 'image' );
+            person_div.appendChild( person_image );
+        }
+
+        table_wrapper_div.appendChild( table_div );
+        main.appendChild( table_wrapper_div );
+
+        table_wrapper_div.addEventListener( 'click', () => {
+            location.replace( `/game/?id=${ table_info.id }` );
+        } );
+    }
+
+    if( tables.length > 0 ) return;
+
+    main.textContent = 'No tables found!';
+}
+
+async function search_for_tables() {
+    const max_players = document.getElementById( 'max-players' );
+    const max_players_value = document.getElementById( 'max-players-checkbox' ).checked ? parseInt( max_players.value ) : 0;
+    const current_players = document.getElementById( 'current-players' );
+    const current_players_value = document.getElementById( 'current-players-checkbox' ).checked ? parseInt( current_players.value ) : 0;
+    const minimal_bid = document.getElementById( 'minimal-bid' );
+    const minimal_bid_value = document.getElementById( 'minimal-bid-checkbox' ).checked ? parseInt( minimal_bid.value ) : 0;
+    const starting_chips = document.getElementById( 'starting-chips' );
+    const starting_chips_value = document.getElementById( 'starting-chips-checkbox' ).checked ? parseInt( starting_chips.value ) : 0;
+    const name = document.getElementById( 'name' );
+    const name_value = document.getElementById( 'name-checkbox' ).checked ? name.value : '';
+
+    return await handle_data( 'search', { name: name_value, max_players: max_players_value, current_players: current_players_value, minimal_bid: minimal_bid_value, starting_chips: starting_chips_value } );
+}
+
+async function refresh_tables() {
+    const main = document.getElementById( 'main' );
+    main.innerHTML = '';
+
+    const tables = await search_for_tables();
+    show_avaliavble_tables( tables );
+}
+
+refresh_tables();
+
+const create = document.getElementById( 'create' );
+create.addEventListener( 'click', async () => {
+
+    let name = sessionStorage.getItem( 'name' );
+    if( name == undefined ) {
+        name = prompt( 'Name' );
+        sessionStorage.setItem( 'name', name );
+    }
+
+    const max_players = document.getElementById( 'max-players' );
+    const minimal_bid = document.getElementById( 'minimal-bid' );
+    const starting_chips = document.getElementById( 'starting-chips' );
+    const table_name = document.getElementById( 'name' );
+
+    const key = await handle_data( 'create', { name: name, table_name: table_name.value, max_players: parseInt( max_players.value ), minimal_bid: parseInt( minimal_bid.value ), starting_chips: parseInt( starting_chips.value ) } );
+    localStorage.setItem( 'key', key );
+
+    const tables = await search_for_tables();
+
+    location.replace( `/game/?id=${ tables[ tables.length - 1 ].id }` );
 } );
 
-function animate() {
-
-    delta = clock.getDelta();
-
-    rotateCamera( keyboard, delta );
-    
-    renderer.render( DATA.scene, DATA.player.camera );
-}
-
-renderer.setAnimationLoop( animate );   
+const refresh = document.getElementById( 'refresh' );
+refresh.addEventListener( 'click', refresh_tables );

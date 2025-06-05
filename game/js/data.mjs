@@ -52,7 +52,7 @@ export async function handleData( location, body ) {
             body: JSON.stringify( body )
         });
 
-        if( response.status == 403 || response.status == 425 ) {
+        if( response.status == 403 || response.status == 425 || response.status == 404 ) {
             return "Failed";
         }
 

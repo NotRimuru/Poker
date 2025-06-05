@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Poker 3D</title>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three/build/three.module.js",
+        "three/": "https://unpkg.com/three/"
+      }
+    }
+  </script>
+
+  <link rel = "stylesheet" href = "styles.css">
+</head>
+<body>
+  <div id = "info" ></div>
+
+  <div id = "menu">
+    <div id = "player-info">
+      <div id = "balance">Balance: 0</div>
+      <div id = "bet">Bet: 0</div>
+    </div>
+
+    <div id = "slider-wrapper">
+      <input type = "range" id = "slider" oninput = "this.nextElementSibling.value = this.value">
+      <output id = 'output'>0</output>
+    </div>
+
+    <div id = "fold" class = "button">Fold</div>
+    <div id = "raise" class = "button">Raise</div>
+    <div id = "action" class = "button">Check</div>
+  </div>
+
+  <div id = "exit">Exit</div>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>

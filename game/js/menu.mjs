@@ -1,14 +1,63 @@
-import { player, handleData, scene } from '/js/data.mjs';
+import { player, handleData, scene } from './data.mjs';
 import { tableCards, deleteTableCards, foldCards, createBestHand, playerCards } from './cards.mjs';
 import { createTableSprite, removeTableSprite } from './table.mjs';
 
 let globalData;
+
+export async function prepareEditMenu() {
+    const data = await handleData( 'get_table', { key: player.key } );
+    const edit_menu = document.createElement( 'div' );
+    edit_menu.id = 'edit-menu';
+
+    edit_menu.innerHTML += `
+        <div id = "edit">
+            <img src = "./assets/png/edit.png" class = "image">
+        </div>
+
+        <div class = "label-wrapper">
+            <label for = "name">name</label>
+            <input id = "name" type = "text" placeholder = "Table" value = ${ data.name }>
+        </div>
+
+        <div class = "label-wrapper">
+            <label for = "max-players">max players</label>
+            <div class = "range-input-wrapper">
+                <input id = "max-players" type = "range" min = 3 max = 8 value = ${ data.max_players } placeholder = "8" oninput = "this.nextElementSibling.textContent = this.value"><output id = "max-players-output">${ data.max_players }</output>
+            </div>
+        </div>
+        
+        <div class = "label-wrapper">
+            <label for = "minimal-bid">minimal bid</label>
+            <input id = "minimal-bid" type = "number" placeholder = "10" value = ${ data.minimal_bid }>
+        </div>
+        
+        <div class = "label-wrapper">
+            <label for = "starting-chips">starting chips</label>
+            <input id = "starting-chips" type = "number" placeholder = "100" value = ${ data.starting_chips }>
+        </div>
+    `
+    document.body.appendChild( edit_menu );
+
+    const edit = document.getElementById( 'edit' );
+    edit.addEventListener( 'click', async () => {
+        const name = document.getElementById( 'name' );
+        const max_players = document.getElementById( 'max-players' );
+        const minimal_bid = document.getElementById( 'minimal-bid' );
+        const starting_chips = document.getElementById( 'starting-chips' );
+
+        await handleData( 'edit', { key: player.key, name: name.value, minimal_bid: parseInt( minimal_bid.value ), max_players: parseInt( max_players.value ), starting_chips: parseInt( starting_chips.value ) } )
+    } );
+}
 
 export async function prepareMenu() {
 
     const body = { key: player.key };
     globalData = await handleData( 'get_table', body );
 
+    if( document.getElementById( 'edit-menu' ) ) {
+        document.getElementById( 'edit-menu' ).remove();
+    }
+    
     const slider = document.getElementById( 'slider' );
 
     const min = globalData[ 'minimal_bid' ] < globalData[ 'current_required_bet' ] ? globalData[ 'current_required_bet' ] + 1 : globalData[ 'minimal_bid' ];
@@ -28,7 +77,6 @@ export async function prepareMenu() {
     bet.innerHTML = `Bet: ${ globalData[ 'players' ][ player.id ][ 'current_bet' ] }`; 
 
     if( globalData.current_player_index != player.id ) {
-        awaitYourTurn();
         disableMenu();
         return;
     } 
@@ -60,7 +108,7 @@ export async function prepareMenu() {
     menu.style.opacity = 1;
 }
 
-function disableMenu() {
+export function disableMenu() {
     const fold = document.getElementById( 'fold' );
     const action = document.getElementById( 'action' );
 
@@ -153,6 +201,9 @@ async function showInfo( text ) {
 
 async function win( oldData, newData ) {
 
+    if( player.id == 0 ) {
+        prepareEditMenu();
+    }
 
     let winningPlayers = [];
     for( let i = 0; i < 8; i++ ) {
@@ -251,7 +302,7 @@ async function win( oldData, newData ) {
     } , 5000);
 }
 
-async function awaitYourTurn() {
+export async function awaitYourTurn() {
     const body = { key: player.key };
     const data = await handleData( 'get_table', body );
 

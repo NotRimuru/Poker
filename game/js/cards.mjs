@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader';
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry';
 
-import * as DATA from '/js/data.mjs';
+import * as DATA from './data.mjs';
 
 function createCard( suit, rank, name ) {
 

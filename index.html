@@ -1,42 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Poker 3D</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Tables</title>
 
-  <script type="importmap">
-    {
-      "imports": {
-        "three": "https://unpkg.com/three/build/three.module.js",
-        "three/": "https://unpkg.com/three/"
-      }
-    }
-  </script>
-
-  <link rel = "stylesheet" href = "styles.css">
+    <link rel = "stylesheet" href = "style.css">
 </head>
 <body>
-  <div id = "info" ></div>
+    <div id = "main"></div>
+    <div id = "search">
+        <div id = "buttons-wrapper">
+            <div id = "refresh" class = "button">
+                <img src = "png/search.png" class = "image" >
+            </div>
+            <div id = "create" class = "button">
+                <img src = "png/create.png" class = "image" >
+            </div>
+        </div>
 
-  <div id = "menu">
-    <div id = "player-info">
-      <div id = "balance">Balance: 0</div>
-      <div id = "bet">Bet: 0</div>
+
+        <div class = "label-wrapper">
+            <label for = "name">name</label>
+            <div class = "input-wrapper">
+                <input id = "name-checkbox" type = "checkbox">
+                <input id = "name" type = "text" placeholder = "Table" value = "Table">
+            </div>
+        </div>
+
+        <div class = "label-wrapper">
+            <label for = "current-players">current players</label>
+            <div class = "input-wrapper">
+                <input id = "current-players-checkbox" type = "checkbox">
+                <div class = "range-input-wrapper">
+                    <input id = "current-players" type = "range" min = 1 max = 8 value = 1 placeholder = "1" oninput = "this.nextElementSibling.textContent = this.value"><output>1</output>
+                </div>
+            </div>
+        </div>
+
+        <div class = "label-wrapper">
+            <label for = "max-players">max players</label>
+            <div class = "input-wrapper">
+                <input id = "max-players-checkbox" type = "checkbox">
+                <div class = "range-input-wrapper">
+                    <input id = "max-players" type = "range" min = 3 max = 8 value = 8 placeholder = "8" oninput = "this.nextElementSibling.textContent = this.value"><output>8</output>
+                </div>
+            </div>
+        </div>
+        
+        <div class = "label-wrapper">
+            <label for = "minimal-bid">minimal bid</label>
+            <div class = "input-wrapper">
+                <input id = "minimal-bid-checkbox" type = "checkbox">
+                <input id = "minimal-bid" type = "number" placeholder = "10" value = 10>
+            </div>
+        </div>
+
+        <div class = "label-wrapper">
+            <label for = "starting-chips">starting chips</label>
+            <div class = "input-wrapper">
+                <input id = "starting-chips-checkbox" type = "checkbox">
+                <input id = "starting-chips" type = "number" placeholder = "100" value = 100>
+            </div>
+        </div>
     </div>
 
-    <div id = "slider-wrapper">
-      <input type = "range" id = "slider" oninput = "this.nextElementSibling.value = this.value">
-      <output id = 'output'>0</output>
-    </div>
-
-    <div id = "fold" class = "button">Fold</div>
-    <div id = "raise" class = "button">Raise</div>
-    <div id = "action" class = "button">Check</div>
-  </div>
-
-  <div id = "exit">Exit</div>
-
-  <script type="module" src="/main.js"></script>
+    <script src = "main.js"></script>
 </body>
 </html>

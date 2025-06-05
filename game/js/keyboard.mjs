@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { player, scene, playerTransform } from '/js/data.mjs'; 
+import { player, scene, playerTransform } from './data.mjs'; 
 
 const rotationHelper = new THREE.Mesh( new THREE.BoxGeometry( 1, 1, 1 ), new THREE.MeshBasicMaterial( { opacity: 0, transparent: true } ) );
 
